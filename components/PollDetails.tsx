@@ -115,10 +115,24 @@ export const PollDetails: FC<PollDetailsProps> = ({
         );
 
         if (blockchainCandidates && blockchainCandidates.length > 0) {
-          setCandidates(blockchainCandidates);
+          // Filter out null values and transform to match Candidate interface
+          const validCandidates = blockchainCandidates
+            .filter(
+              (candidate): candidate is NonNullable<typeof candidate> =>
+                candidate !== null
+            )
+            .map((candidate) => ({
+              publicKey: candidate.publicKey,
+              account: {
+                name: candidate.account.name,
+                index: candidate.account.index,
+              },
+            }));
+
+          setCandidates(validCandidates);
           console.log(
             "✅ Candidates loaded from blockchain:",
-            blockchainCandidates.length
+            validCandidates.length
           );
         } else {
           console.log("❌ No candidates found on blockchain for this poll");
@@ -208,6 +222,7 @@ export const PollDetails: FC<PollDetailsProps> = ({
       if (existingCandidates && existingCandidates.length > 0) {
         // Get all existing indices and find the next available one
         const existingIndices = existingCandidates
+          .filter((c): c is NonNullable<typeof c> => c !== null)
           .map((c) => c.account.index)
           .sort((a, b) => a - b);
         console.log("🔍 Existing candidate indices:", existingIndices);
@@ -286,7 +301,7 @@ export const PollDetails: FC<PollDetailsProps> = ({
 
       // Show success message with transaction details
       const transactionSignature =
-        typeof tx === "object" && tx.signature ? tx.signature : tx;
+        typeof tx === "string" ? tx : tx.signature || "Unknown";
       const transactionLink = `https://explorer.solana.com/tx/${transactionSignature}?cluster=devnet`;
 
       toast.success(
@@ -338,12 +353,15 @@ export const PollDetails: FC<PollDetailsProps> = ({
     } catch (error) {
       console.error("Error adding candidate to blockchain:", error);
 
-      if (error.message.includes("User rejected")) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+
+      if (errorMessage.includes("User rejected")) {
         toast.error("Transaction was rejected by user");
-      } else if (error.message.includes("insufficient funds")) {
+      } else if (errorMessage.includes("insufficient funds")) {
         toast.error("Insufficient balance to add candidate");
       } else {
-        toast.error(`Failed to add candidate: ${error.message}`);
+        toast.error(`Failed to add candidate: ${errorMessage}`);
       }
     } finally {
       setLoading(false);
@@ -515,7 +533,9 @@ export const PollDetails: FC<PollDetailsProps> = ({
       }
     } catch (error) {
       console.error("❌ Error closing poll:", error);
-      toast.error(`Failed to close poll: ${error.message}`);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      toast.error(`Failed to close poll: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -536,6 +556,9 @@ export const PollDetails: FC<PollDetailsProps> = ({
       toast.error("Your wallet does not support signing transactions");
       return;
     }
+
+    // Declare feeToast at function scope so it can be used in catch blocks
+    let feeToast: string | undefined;
 
     try {
       setLoading(true);
@@ -672,20 +695,22 @@ export const PollDetails: FC<PollDetailsProps> = ({
         // Dismiss the loading toast
         toast.dismiss(feeToast);
 
-        if (transactionError.message.includes("User rejected")) {
+        const errorMessage =
+          transactionError instanceof Error
+            ? transactionError.message
+            : String(transactionError);
+
+        if (errorMessage.includes("User rejected")) {
           toast.error("Voting fee transaction was rejected by user");
-        } else if (transactionError.message.includes("insufficient funds")) {
+        } else if (errorMessage.includes("insufficient funds")) {
           toast.error("Insufficient balance to pay voting fee");
         } else {
-          toast.error(
-            `Failed to process voting fee: ${transactionError.message}`
-          );
+          toast.error(`Failed to process voting fee: ${errorMessage}`);
         }
         return;
       }
 
       // Real blockchain voting
-      let feeToast: string | number | undefined;
       try {
         console.log(
           "🗳️ Casting votes on Solana blockchain using D21VotingClient..."
@@ -722,7 +747,7 @@ export const PollDetails: FC<PollDetailsProps> = ({
           await connection.getAccountInfo(voteRecordPda);
         const voteRecordExists = voteRecordAccountInfo !== null;
 
-        let transaction: Transaction;
+        let transaction: any;
 
         if (!voteRecordExists) {
           // Initialize the vote record if it doesn't exist
@@ -848,7 +873,11 @@ export const PollDetails: FC<PollDetailsProps> = ({
         }
       } catch (votingError) {
         console.error("❌ Error casting votes on blockchain:", votingError);
-        toast.error(`Failed to cast votes: ${votingError.message}`);
+        const errorMessage =
+          votingError instanceof Error
+            ? votingError.message
+            : String(votingError);
+        toast.error(`Failed to cast votes: ${errorMessage}`);
         return;
       }
 

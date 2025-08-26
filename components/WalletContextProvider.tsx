@@ -13,17 +13,24 @@ import {
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl } from "@solana/web3.js";
 
-// Import wallet adapter CSS only on client side
-if (typeof window !== "undefined") {
-  require("@solana/wallet-adapter-react-ui/styles.css");
-}
-
 interface Props {
   children: ReactNode;
 }
 
 export const WalletContextProvider: FC<Props> = ({ children }) => {
   const [mounted, setMounted] = useState(false);
+
+  // Import wallet adapter CSS only on client side
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // Dynamic import of CSS for wallet adapter styles
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href =
+        "https://unpkg.com/@solana/wallet-adapter-react-ui@0.9.39/styles.css";
+      document.head.appendChild(link);
+    }
+  }, []);
 
   useEffect(() => {
     setMounted(true);

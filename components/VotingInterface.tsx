@@ -17,29 +17,9 @@ import {
 } from "./ui/Breadcrumbs";
 import { DashboardStats } from "./ui/DashboardStats";
 import { EnhancedButton } from "./ui/EnhancedButton";
+import { Poll } from "../lib/types";
 
-// Unified Poll interface that works for both PollList and PollDetails
-interface Poll {
-  publicKey: string;
-  account: {
-    title: string;
-    isOpen: boolean;
-    maxVotesPerVoter: number;
-    maxCandidates: number;
-    candidateCount: number;
-    voteCounts: number[];
-    authority: string;
-    pollId: string;
-    candidates?: Array<{
-      publicKey: string;
-      account: {
-        poll: string;
-        index: number;
-        name: string;
-      };
-    }>;
-  };
-}
+// Using the imported Poll type from lib/types
 
 export const VotingInterface: FC = () => {
   const { publicKey } = useWallet();
@@ -289,7 +269,7 @@ export const VotingInterface: FC = () => {
         </EnhancedButton>
       </div>
 
-      <SearchAndFilter polls={polls} onFilteredPollsChange={setFilteredPolls} />
+      <SearchAndFilter polls={polls} onFilterChange={setFilteredPolls} />
 
       {loading ? (
         <div className="space-y-4">

@@ -1,9 +1,5 @@
 import React from "react";
-
-interface DashboardStatsProps {
-  polls: any[];
-  className?: string;
-}
+import { DashboardStatsProps } from "../../lib/types";
 
 export const DashboardStats: React.FC<DashboardStatsProps> = ({
   polls,

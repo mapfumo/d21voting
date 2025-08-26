@@ -3,13 +3,10 @@
 import { FC, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { createProgram } from "../lib/solana-clean";
-import { PublicKey, SystemProgram } from "@solana/web3.js";
+import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { BN } from "bn.js";
 import { toast } from "react-hot-toast";
-
-interface CreatePollFormProps {
-  onPollCreated: (pollData?: any) => void;
-}
+import { Wallet, Program, PollData, CreatePollFormProps } from "../lib/types";
 
 export const CreatePollForm: FC<CreatePollFormProps> = ({ onPollCreated }) => {
   const { publicKey, signTransaction } = useWallet();
@@ -35,17 +32,17 @@ export const CreatePollForm: FC<CreatePollFormProps> = ({ onPollCreated }) => {
       console.log("Wallet signTransaction:", signTransaction);
 
       // Create a proper wallet object that matches the Wallet interface
-      const wallet = {
+      const wallet: Wallet = {
         publicKey,
         signTransaction,
-        signAllTransactions: async (transactions: any[]) => {
+        signAllTransactions: async (transactions: Transaction[]) => {
           return transactions.map((tx) => tx);
         },
         payer: publicKey, // Add the required payer property
       };
 
       console.log("Created wallet object:", wallet);
-      const program = await createProgram(wallet as any);
+      const program: Program = await createProgram(wallet);
       console.log("Program created:", program);
 
       // Generate poll PDA
@@ -93,7 +90,7 @@ export const CreatePollForm: FC<CreatePollFormProps> = ({ onPollCreated }) => {
       const transactionLink = `https://explorer.solana.com/tx/${tx}?cluster=devnet`;
 
       toast.success(
-        (t) => (
+        () => (
           <div className="flex flex-col space-y-3">
             <span className="text-center font-medium text-green-400">
               Poll created successfully! 🎉
@@ -119,7 +116,7 @@ export const CreatePollForm: FC<CreatePollFormProps> = ({ onPollCreated }) => {
       );
 
       // Create poll data object to pass to callback
-      const pollData = {
+      const pollData: PollData = {
         publicKey: pollPda.toString(),
         account: {
           authority: publicKey.toString(),

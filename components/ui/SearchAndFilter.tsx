@@ -1,14 +1,9 @@
 import React, { useState, useMemo } from "react";
-
-interface SearchAndFilterProps {
-  polls: any[];
-  onFilteredPollsChange: (filteredPolls: any[]) => void;
-  className?: string;
-}
+import { SearchAndFilterProps } from "../../lib/types";
 
 export const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
   polls,
-  onFilteredPollsChange,
+  onFilterChange,
   className = "",
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,7 +16,7 @@ export const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   const filteredAndSortedPolls = useMemo(() => {
-    let filtered = polls.filter((poll) => {
+    const filtered = polls.filter((poll) => {
       const matchesSearch = poll.account.title
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
@@ -34,8 +29,8 @@ export const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
     });
 
     // Sort polls
-    filtered.sort((a, b) => {
-      let aValue: any, bValue: any;
+    const sortedPolls = [...filtered].sort((a, b) => {
+      let aValue: string | number, bValue: string | number;
 
       switch (sortBy) {
         case "title":
@@ -72,16 +67,9 @@ export const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
       }
     });
 
-    onFilteredPollsChange(filtered);
-    return filtered;
-  }, [
-    polls,
-    searchTerm,
-    statusFilter,
-    sortBy,
-    sortOrder,
-    onFilteredPollsChange,
-  ]);
+    onFilterChange(sortedPolls);
+    return sortedPolls;
+  }, [polls, searchTerm, statusFilter, sortBy, sortOrder, onFilterChange]);
 
   return (
     <div className={`space-y-4 ${className}`}>

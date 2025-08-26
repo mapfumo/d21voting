@@ -14,9 +14,11 @@ import {
 import { DashboardStats } from "./ui/DashboardStats";
 import { EnhancedButton, ActionButton, IconButton } from "./ui/EnhancedButton";
 import { TransactionFeeEstimator } from "./ui/TransactionFeeEstimator";
+import { Poll } from "../lib/types";
+import { toast } from "react-hot-toast";
 
 // Mock data for demo
-const mockPolls = [
+const mockPolls: Poll[] = [
   {
     publicKey: "poll1",
     account: {
@@ -29,6 +31,7 @@ const mockPolls = [
       authority: "user1",
       pollId: "1",
     },
+    candidates: [],
   },
   {
     publicKey: "poll2",
@@ -42,6 +45,7 @@ const mockPolls = [
       authority: "user2",
       pollId: "2",
     },
+    candidates: [],
   },
 ];
 
@@ -105,7 +109,7 @@ export const UXDemo: React.FC = () => {
           <div className="bg-gray-700 p-6 rounded-lg">
             <SearchAndFilter
               polls={mockPolls}
-              onFilteredPollsChange={setFilteredPolls}
+              onFilterChange={setFilteredPolls}
             />
             <div className="mt-4 text-sm text-gray-400">
               Filtered results: {filteredPolls.length} polls
