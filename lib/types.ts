@@ -46,10 +46,18 @@ export interface PollAccount {
   pollId: string | number;
 }
 
+export interface Candidate {
+  publicKey: string;
+  account: {
+    name: string;
+    index: number;
+  };
+}
+
 export interface Poll {
   publicKey: string;
   account: PollAccount;
-  candidates: any[];
+  candidates: Candidate[];
 }
 
 export interface PollData {

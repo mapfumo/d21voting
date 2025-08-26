@@ -29,8 +29,7 @@ export const TransactionFeeEstimator: React.FC<
 
         // Estimate fee
         const fee = await connection.getFeeForMessage(
-          transaction.compileMessage(),
-          blockhash
+          transaction.compileMessage()
         );
 
         setEstimatedFee(fee.value);

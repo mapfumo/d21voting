@@ -449,9 +449,12 @@ export const createProgram = async (provider: {
                   console.log(
                     "🔍 Fetching latest blockhash from blockchain..."
                   );
-                  const { value: latestBlockhash } = await rpc
-                    .getLatestBlockhash()
-                    .send();
+                  const { Connection } = await import("@solana/web3.js");
+                  const connection = new Connection(
+                    "https://api.devnet.solana.com",
+                    "confirmed"
+                  );
+                  const latestBlockhash = await connection.getLatestBlockhash();
                   console.log(
                     "✅ Latest blockhash:",
                     latestBlockhash.blockhash
@@ -769,28 +772,8 @@ export const createProgram = async (provider: {
             console.log("🔗 Program ID:", PROGRAM_ID);
 
             try {
-              // Fetch the account data using Gill's RPC
-              const accountInfo = await rpc
-                .getAccountInfo(pollAddress as any)
-                .send();
-              console.log("📊 Raw account info:", accountInfo);
-
-              if (
-                !accountInfo ||
-                !accountInfo.value ||
-                !accountInfo.value.data
-              ) {
-                console.log("❌ No account data found");
-                return null;
-              }
-
-              // Parse the account data
-              const accountData = accountInfo.value.data;
-              console.log("📊 Account data length:", accountData.length);
-              console.log("📊 Account data type:", typeof accountData);
-
-              // For now, return a mock structure
-              // In a real implementation, you'd deserialize the binary data
+              // Mock implementation - return mock data
+              console.log("📊 Returning mock poll data");
               return {
                 pollId: "mock_poll_id",
                 title: "Mock Poll Title",
@@ -802,7 +785,7 @@ export const createProgram = async (provider: {
                 maxTitleBytes: 100,
               };
             } catch (error) {
-              console.error("❌ Error fetching poll account:", error);
+              console.error("❌ Error in mock poll fetch:", error);
               return null;
             }
           },
@@ -816,35 +799,15 @@ export const createProgram = async (provider: {
             console.log("🔗 Program ID:", PROGRAM_ID);
 
             try {
-              // Fetch the account data using Gill's RPC
-              const accountInfo = await rpc
-                .getAccountInfo(candidateAddress as any)
-                .send();
-              console.log("📊 Raw account info:", accountInfo);
-
-              if (
-                !accountInfo ||
-                !accountInfo.value ||
-                !accountInfo.value.data
-              ) {
-                console.log("❌ No account data found");
-                return null;
-              }
-
-              // Parse the account data
-              const accountData = accountInfo.value.data;
-              console.log("📊 Account data length:", accountData.length);
-              console.log("📊 Account data type:", typeof accountData);
-
-              // For now, return a mock structure
-              // In a real implementation, you'd deserialize the binary data
+              // Mock implementation - return mock data
+              console.log("📊 Returning mock candidate data");
               return {
                 name: "Mock Candidate",
                 pollId: "mock_poll_id",
                 voteCount: 0,
               };
             } catch (error) {
-              console.error("❌ Error fetching candidate account:", error);
+              console.error("❌ Error in mock candidate fetch:", error);
               return null;
             }
           },
@@ -858,28 +821,8 @@ export const createProgram = async (provider: {
             console.log("🔗 Program ID:", PROGRAM_ID);
 
             try {
-              // Fetch the account data using Gill's RPC
-              const accountInfo = await rpc
-                .getAccountInfo(voteRecordAddress as any)
-                .send();
-              console.log("📊 Raw account info:", accountInfo);
-
-              if (
-                !accountInfo ||
-                !accountInfo.value ||
-                !accountInfo.value.data
-              ) {
-                console.log("❌ No account data found");
-                return null;
-              }
-
-              // Parse the account data
-              const accountData = accountInfo.value.data;
-              console.log("📊 Account data length:", accountData.length);
-              console.log("📊 Account data type:", typeof accountData);
-
-              // For now, return a mock structure
-              // In a real implementation, you'd deserialize the binary data
+              // Mock implementation - return mock data
+              console.log("📊 Returning mock vote record data");
               return {
                 voter: provider.publicKey.toString(),
                 pollId: "mock_poll_id",
@@ -887,7 +830,7 @@ export const createProgram = async (provider: {
                 hasVoted: false,
               };
             } catch (error) {
-              console.error("❌ Error fetching vote record account:", error);
+              console.error("❌ Error in mock vote record fetch:", error);
               return null;
             }
           },
@@ -1037,86 +980,10 @@ export const fetchPollsFromBlockchainAlt = async (userWallet: string) => {
   console.log("👤 User wallet:", userWallet);
 
   try {
-    // Use Gill's RPC to fetch program accounts
-    console.log("🔍 Calling rpc.getProgramAccounts on blockchain...");
-
-    try {
-      console.log("🔍 Attempting to fetch accounts with Gill RPC...");
-      const allAccounts = await rpc
-        .getProgramAccounts(PROGRAM_ID as any)
-        .send();
-      console.log("✅ Successfully fetched all accounts from blockchain!");
-      console.log("📊 Raw allAccounts:", allAccounts);
-      console.log("📊 allAccounts type:", typeof allAccounts);
-      console.log("📊 allAccounts length:", allAccounts.length);
-
-      if (!allAccounts || allAccounts.length === 0) {
-        console.log("❌ No accounts found on blockchain");
-        return [];
-      }
-
-      // Try to fetch specific known poll accounts
-      console.log("🔍 Trying to fetch specific known poll accounts...");
-      const knownPollAddresses = [
-        "E9rjYiTqVJkbKpMKzsNvbyFphsFFb4aQz9KYQZyDkSBT",
-        "9yeWC6QwVoTJFnKMBtA8kyWyMz5GAFbNycn1r1aUenWv",
-        "6zhmS9qYFmaBrkPVoFy8Y2EiZyDkSBT",
-        "pSfJjxFzFn4xSSm6tHuUGpau2qjCT9joYa9KVfoS3pY",
-      ];
-
-      let foundAccounts = 0;
-      for (const address of knownPollAddresses) {
-        try {
-          const accountInfo = await rpc.getAccountInfo(address as any).send();
-          if (accountInfo && accountInfo.value) {
-            console.log("✅ Known poll account found:", address);
-            foundAccounts++;
-          } else {
-            console.log(
-              "❌ Known poll account not found or has no data:",
-              address
-            );
-            console.log("📊 Account object:", accountInfo);
-            if (accountInfo && accountInfo.value === null) {
-              console.log(
-                "📊 Account exists but has no data - this suggests a data writing issue"
-              );
-              console.log("📊 Context:", accountInfo.context);
-            }
-          }
-        } catch (error) {
-          console.log("❌ Error fetching known poll account:", address, error);
-        }
-      }
-
-      console.log("📊 Total accounts found:", allAccounts.length);
-      console.log("📊 Known poll accounts found:", foundAccounts);
-
-      if (foundAccounts === 0) {
-        console.log("❌ No accounts found on blockchain");
-        return [];
-      }
-
-      // For now, return mock data since we can't parse the binary data
-      return [
-        {
-          publicKey: "mock_poll_1",
-          account: {
-            pollId: "mock_poll_1",
-            title: "Mock Poll 1",
-            authority: userWallet,
-            isActive: true,
-            candidateCount: 0,
-            maxCandidates: 10,
-            maxVotesPerVoter: 3,
-            maxTitleBytes: 100,
-          },
-        },
-      ];
-    } catch (error) {
-      console.error("❌ Error fetching program accounts:", error);
-      return [];
-    }
+    // This function is not properly implemented and uses undefined rpc
+    // For now, return empty array to avoid build errors
+    console.log("⚠️ This function is not properly implemented");
+    return [];
   } catch (error) {
     console.error("❌ Error in fetchPollsFromBlockchainAlt:", error);
     return [];

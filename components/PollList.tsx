@@ -1,26 +1,7 @@
 "use client";
 
 import { FC, useState } from "react";
-
-interface Poll {
-  publicKey: string;
-  account: {
-    title: string;
-    isOpen: boolean;
-    maxVotesPerVoter: number;
-    maxCandidates: number;
-    candidateCount: number;
-    voteCounts: number[];
-    candidates?: Array<{
-      publicKey: string;
-      account: {
-        poll: string;
-        index: number;
-        name: string;
-      };
-    }>;
-  };
-}
+import { Poll } from "../lib/types";
 
 interface PollListProps {
   polls: Poll[];
@@ -45,8 +26,8 @@ export const PollList: FC<PollListProps> = ({
           publicKey: poll.publicKey,
           title: poll.account?.title,
           candidateCount: poll.account?.candidateCount,
-          candidates: poll.account?.candidates,
-          candidatesLength: poll.account?.candidates?.length || 0,
+          candidates: poll.candidates,
+          candidatesLength: poll.candidates?.length || 0,
           hasBlockchainData: !!poll.publicKey && poll.publicKey !== "undefined",
         });
       } else {
@@ -130,7 +111,7 @@ export const PollList: FC<PollListProps> = ({
               <div className="flex gap-2 mt-1 flex-wrap">
                 {poll.account.voteCounts.map((count, i) => {
                   // Get the actual candidate name from blockchain data
-                  const candidate = poll.account.candidates?.find(
+                  const candidate = poll.candidates?.find(
                     (c) => c.account.index === i
                   );
                   const candidateName = candidate
@@ -142,11 +123,10 @@ export const PollList: FC<PollListProps> = ({
                     count,
                     candidate,
                     candidateName,
-                    allCandidates: poll.account.candidates,
+                    allCandidates: poll.candidates,
                     candidateCount: poll.account.candidateCount,
                     hasBlockchainData:
-                      !!poll.account.candidates &&
-                      poll.account.candidates.length > 0,
+                      !!poll.candidates && poll.candidates.length > 0,
                   });
 
                   return (

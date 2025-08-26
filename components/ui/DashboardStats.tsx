@@ -1,5 +1,5 @@
 import React from "react";
-import { DashboardStatsProps } from "../../lib/types";
+import { DashboardStatsProps, Poll } from "../../lib/types";
 
 export const DashboardStats: React.FC<DashboardStatsProps> = ({
   polls,
@@ -26,17 +26,20 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({
     const averageVotesPerPoll =
       totalPolls > 0 ? (totalVotes / totalPolls).toFixed(1) : "0";
 
-    const mostPopularPoll = polls.reduce((mostPopular, poll) => {
-      const pollVotes = (poll.account.voteCounts || []).reduce(
-        (sum: number, count: number) => sum + count,
-        0
-      );
-      const mostVotes = (mostPopular?.account.voteCounts || []).reduce(
-        (sum: number, count: number) => sum + count,
-        0
-      );
-      return pollVotes > mostVotes ? poll : mostPopular;
-    }, null);
+    const mostPopularPoll = polls.reduce(
+      (mostPopular: Poll | null, poll: Poll) => {
+        const pollVotes = (poll.account.voteCounts || []).reduce(
+          (sum: number, count: number) => sum + count,
+          0
+        );
+        const mostVotes = (mostPopular?.account.voteCounts || []).reduce(
+          (sum: number, count: number) => sum + count,
+          0
+        );
+        return pollVotes > mostVotes ? poll : mostPopular;
+      },
+      null as Poll | null
+    );
 
     return {
       totalPolls,

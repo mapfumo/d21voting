@@ -4,28 +4,7 @@ import { FC, useState, useEffect } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { toast } from "react-hot-toast";
 import { PublicKey } from "@solana/web3.js";
-
-interface Candidate {
-  publicKey: string;
-  account: {
-    name: string;
-    index: number;
-  };
-}
-
-interface Poll {
-  publicKey: string;
-  account: {
-    title: string;
-    isOpen: boolean;
-    maxVotesPerVoter: number;
-    maxCandidates: number;
-    candidateCount: number;
-    voteCounts: number[];
-    authority: string;
-    pollId: string;
-  };
-}
+import { Poll, Candidate } from "../lib/types";
 
 interface PollDetailsProps {
   poll: Poll;

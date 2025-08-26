@@ -40,7 +40,10 @@ export interface VoteRecordAccount {
 }
 
 export class ProgramUtils {
-  constructor(private program: any, private connection: Connection) {}
+  constructor(
+    private program: any,
+    private connection: Connection
+  ) {}
 
   // Fetch all polls
   async fetchPolls(): Promise<PollAccount[]> {
@@ -168,9 +171,11 @@ export class ProgramUtils {
         console.log("🔍 First blockchain account structure:", {
           pubkey: allAccounts[0].pubkey,
           dataLength: allAccounts[0].account.data.length,
-          dataPreview: Array.from(allAccounts[0].account.data.slice(0, 32))
-            .map((b) => b.toString(16).padStart(2, "0"))
-            .join(" "),
+          dataPreview:
+            Buffer.from(allAccounts[0].account.data.slice(0, 32))
+              .toString("hex")
+              .match(/.{1,2}/g)
+              ?.join(" ") || "",
         });
       }
 
@@ -180,9 +185,11 @@ export class ProgramUtils {
           // Log each account's data structure to understand what we're working with
           console.log(`🔍 Blockchain account ${account.pubkey.toString()}:`, {
             dataLength: account.account.data.length,
-            dataPreview: Array.from(account.account.data.slice(0, 32))
-              .map((b) => b.toString(16).padStart(2, "0"))
-              .join(" "),
+            dataPreview:
+              Buffer.from(account.account.data.slice(0, 32))
+                .toString("hex")
+                .match(/.{1,2}/g)
+                ?.join(" ") || "",
           });
 
           // Check if this account contains the poll public key anywhere
@@ -190,9 +197,9 @@ export class ProgramUtils {
           const pollKeyHex = pollKeyBuffer.toString("hex");
 
           // Convert account data to hex string for searching
-          const accountDataHex = Array.from(account.account.data)
-            .map((b) => b.toString(16).padStart(2, "0"))
-            .join("");
+          const accountDataHex = Buffer.from(account.account.data).toString(
+            "hex"
+          );
 
           if (accountDataHex.includes(pollKeyHex)) {
             console.log(
@@ -223,9 +230,11 @@ export class ProgramUtils {
               `🔍 Parsing blockchain candidate data for account ${account.pubkey.toString()}:`,
               {
                 dataLength: data.length,
-                fullDataHex: Array.from(data)
-                  .map((b) => b.toString(16).padStart(2, "0"))
-                  .join(" "),
+                fullDataHex:
+                  Buffer.from(data)
+                    .toString("hex")
+                    .match(/.{1,2}/g)
+                    ?.join(" ") || "",
               }
             );
 
@@ -312,7 +321,7 @@ export class ProgramUtils {
       );
 
       // Return only blockchain data - no local storage fallback
-      return candidates;
+      return candidates as CandidateAccount[];
     } catch (error) {
       console.error(
         `❌ Error fetching candidates from Solana devnet for poll ${pollPublicKey.toString()}:`,
@@ -342,9 +351,8 @@ export class ProgramUtils {
         new PublicKey(PROGRAM_ID)
       );
 
-      const voteRecord = await this.program.account.voteRecord.fetch(
-        voteRecordPda
-      );
+      const voteRecord =
+        await this.program.account.voteRecord.fetch(voteRecordPda);
       return {
         publicKey: voteRecordPda.toString(),
         account: voteRecord,
