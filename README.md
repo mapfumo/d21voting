@@ -2,6 +2,10 @@
 
 A React/Next.js frontend application for the D21 voting Solana program. This application allows users to create polls, add candidates, and cast votes using their Solana wallet.
 
+## 🚀 Live Demo
+
+**Try it out:** [https://d21voting.vercel.app/](https://d21voting.vercel.app/)
+
 ## Features
 
 - 🔐 Solana wallet integration (Phantom, Solflare, Backpack)
@@ -19,6 +23,12 @@ A React/Next.js frontend application for the D21 voting Solana program. This app
 - Solana devnet SOL for testing
 
 ## Setup
+
+### Option 1: Use the Live Version
+
+The easiest way to try the application is to visit the [live demo](https://d21voting.vercel.app/) and connect your Solana wallet.
+
+### Option 2: Run Locally
 
 1. **Install dependencies:**
 
